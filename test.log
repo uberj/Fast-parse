@@ -9,5 +9,4 @@ Aug 23 00:00:08 ns1 dhcpd: DHCPACK on 128.193.94.168 to ff:ff:ff:ff:ff:ff via 12
 Aug 23 00:00:09 ns2 dhcpd: DHCPACK on 10.196.13.204 to ff:ff:ff:ff:ff:ff via eth0
 Aug 23 00:00:10 ns2 dhcpd: DHCPACK on 128.193.94.168 to ff:ff:ff:ff:ff:ff via 128.193.94.1
 Aug 23 00:00:11 ns1 dhcpd: DHCPACK on 128.193.94.168 to ff:ff:ff:ff:ff:ff via 128.193.94.1
-
-
+Aug 23 00:00:02 ns1 dhcpd: DHCPNAK on 10.0.0.79 to ff:ff:ff:ff:ff:ff via 10.196.8.1

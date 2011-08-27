@@ -16,9 +16,25 @@ struct par_arg {
     int written; // Number of bytes written.
 };
 
+/* A very unsmart function to parse logs */
 int parse_line( void *args, char *line, int len) {
-    memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, line, strlen(line));
-    ((struct par_arg*)args)->written += len;
+    if(line[31] == 'A'){
+        printf("ACK\n");
+        // timestap plus extra space
+        memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, line[7], 9);
+        ((struct par_arg*)args)->written += 9;
+        // "ACK "
+        memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, "ACK ", 4);
+        ((struct par_arg*)args)->written += 4;
+        // Mac
+        memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, "ACK ", 4);
+        ((struct par_arg*)args)->written += 4;
+    } else if( line[31] == 'N' ){
+        printf("NAK\n");
+    }else{
+        memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, line, strlen(line));
+        ((struct par_arg*)args)->written += len;
+    }
 }
 
 void * parse_lines( void * args ) {
@@ -43,7 +59,7 @@ void * parse_lines( void * args ) {
 
     while( fgets( line, BUFF_SIZE, fp ) != NULL && start < stop ) {
         len = strlen( line );
-        printf("%d = line is: %s\n",thread,line);
+        //printf("%d = line is: %s\n",thread,line);
         parse_line( args, line , len);
         start += len;
     }
@@ -119,7 +135,7 @@ int main( int argc, char **argv ) {
             exit(-1);
         }
         printf("Main: completed join with thread %ld having a status of %ld\n",(long)i,(long)status);
-        printf("%i = %s",(int)i,par_arg[i].o_buff);
+//        printf("%i = %s",(int)i,par_arg[i].o_buff);
         fwrite( par_arg[i].o_buff, 1, par_arg[i].written, out_file );
     }
 
