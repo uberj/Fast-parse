@@ -4,7 +4,7 @@
 #include <fcntl.h>
 #include <string.h>
 
-#define CPUS 3
+#define CPUS 1
 #define BUFF_SIZE 150
 
 struct par_arg {
@@ -18,22 +18,53 @@ struct par_arg {
 
 /* A very unsmart function to parse logs */
 int parse_line( void *args, char *line, int len) {
+    char dig;
+    int i;
     if(line[31] == 'A'){
-        printf("ACK\n");
+        //printf("ACK\n");
         // timestap plus extra space
-        memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, line[7], 9);
-        ((struct par_arg*)args)->written += 9;
+        memcpy(((struct par_arg*)args)->o_buff + ((struct par_arg*)args)->written, line, 16);
+        ((struct par_arg*)args)->written += 16;
         // "ACK "
-        memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, "ACK ", 4);
+        memcpy(((struct par_arg*)args)->o_buff + ((struct par_arg*)args)->written, "ACK ", 4);
         ((struct par_arg*)args)->written += 4;
-        // Mac
-        memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, "ACK ", 4);
-        ((struct par_arg*)args)->written += 4;
+        // IP - ip start on character 38
+        for( i= 38, dig = line[i] ; dig != ' ' ; i++, dig = line[i] ){
+            continue;
+        }
+        memcpy(((struct par_arg*)args)->o_buff + ((struct par_arg*)args)->written, line+38, i-37 );
+        ((struct par_arg*)args)->written += i-37; // We want to catch the extra space
+
+        // Mac 
+        // we stopped at space after ip. Add four bytes and we are at mac.
+        memcpy(((struct par_arg*)args)->o_buff + ((struct par_arg*)args)->written, line+i+4, 17);
+        ((struct par_arg*)args)->written += 17; //12 hex + 5 colons
+        ((struct par_arg*)args)->o_buff[((struct par_arg*)args)->written] = '\n';
+        ++((struct par_arg*)args)->written;
     } else if( line[31] == 'N' ){
-        printf("NAK\n");
+        //printf("NAK\n");
+        // timestap plus extra space
+        memcpy(((struct par_arg*)args)->o_buff + ((struct par_arg*)args)->written, line, 16);
+        ((struct par_arg*)args)->written += 16;
+        // "ACK "
+        memcpy(((struct par_arg*)args)->o_buff + ((struct par_arg*)args)->written, "NAK ", 4);
+        ((struct par_arg*)args)->written += 4;
+        // IP - ip start on character 38
+        for( i= 38, dig = line[i] ; dig != ' ' ; i++, dig = line[i] ){
+            continue;
+        }
+        memcpy(((struct par_arg*)args)->o_buff + ((struct par_arg*)args)->written, line+38, i-37 );
+        ((struct par_arg*)args)->written += i-37; // We want to catch the extra space
+
+        // Mac 
+        // we stopped at space after ip. Add four bytes and we are at mac.
+        memcpy(((struct par_arg*)args)->o_buff + ((struct par_arg*)args)->written, line+i+4, 17);
+        ((struct par_arg*)args)->written += 17; //12 hex + 5 colons
+        ((struct par_arg*)args)->o_buff[((struct par_arg*)args)->written] = '\n';
+        ++((struct par_arg*)args)->written;
     }else{
-        memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, line, strlen(line));
-        ((struct par_arg*)args)->written += len;
+        //memcpy(((struct par_arg*)args)->written + ((struct par_arg*)args)->o_buff, line, strlen(line));
+        //((struct par_arg*)args)->written += len;
     }
 }
 
