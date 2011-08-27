@@ -1,0 +1,6 @@
+run
+*.o
+a.out
+status
+test.log
+status
